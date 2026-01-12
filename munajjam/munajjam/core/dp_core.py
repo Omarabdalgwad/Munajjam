@@ -68,10 +68,10 @@ def compute_alignment_cost(
 
 
 def _filter_special_segments(segments: list[Segment], ayahs: list[Ayah]) -> list[Segment]:
-    """Filter out non-ayah segments (isti3aza, basmala for non-Fatiha)."""
+    """Filter out non-ayah segments (istiadha, basmala for non-Fatiha)."""
     filtered = []
     for seg in segments:
-        if seg.type == SegmentType.ISTI3AZA:
+        if seg.type == SegmentType.ISTIADHA:
             continue
         if seg.type == SegmentType.BASMALA and ayahs[0].surah_id != 1:
             continue

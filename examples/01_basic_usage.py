@@ -15,8 +15,8 @@ from munajjam.data import load_surah_ayahs
 
 def main():
     # Path to your audio file
-    audio_path = "path/to/surah_001.wav"
-    surah_number = 1
+    audio_path = "Quran/badr_alturki_audio/114.wav"
+    surah_number = 114
 
     print(f"Processing Surah {surah_number}...\n")
 

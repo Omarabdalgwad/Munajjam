@@ -23,7 +23,7 @@ Munajjam uses a sophisticated two-stage pipeline to synchronize Quranic audio wi
 
 - Uses **Tarteel AI's Whisper model** (specialized for Quranic Arabic)
 - Detects silence periods to segment the audio intelligently
-- Identifies special segments (Isti'aza and Basmala) with pattern matching
+- Identifies special segments (Istiadha and Basmala) with pattern matching
 - Supports both standard transformers and faster-whisper backends
 - Optimized for Apple Silicon (MPS) GPU acceleration
 
@@ -83,7 +83,7 @@ Identifies ayah boundaries by detecting significant silence gaps between segment
 
 ### 3. **Special Segment Handling** 🕌
 
-Properly tracks Isti'aza (أعوذ بالله من الشيطان الرجيم) and Basmala (بسم الله الرحمن الرحيم) segments separately from ayahs.
+Properly tracks Istiadha (أعوذ بالله من الشيطان الرجيم) and Basmala (بسم الله الرحمن الرحيم) segments separately from ayahs.
 
 **Features:**
 

@@ -237,8 +237,8 @@ def align_segments(
         # Determine if we should skip this segment
         special_type = detect_special_type(segment)
         
-        # Always skip isti'aza
-        if special_type == "isti3aza":
+        # Always skip istiadha
+        if special_type == "istiadha":
             i += 1
             continue
         

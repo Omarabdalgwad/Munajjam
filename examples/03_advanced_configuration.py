@@ -12,7 +12,6 @@ from munajjam.transcription import WhisperTranscriber, detect_silences
 from munajjam.core import Aligner
 from munajjam.data import load_surah_ayahs
 from munajjam.config import configure
-import librosa
 
 
 def progress_callback(current, total):
@@ -23,8 +22,8 @@ def progress_callback(current, total):
 
 def main():
     # Configuration
-    audio_path = "path/to/surah_001.wav"
-    surah_number = 1
+    audio_path = "Quran/badr_alturki_audio/114.wav"
+    surah_number = 114
 
     print("Advanced Munajjam Configuration Example")
     print("=" * 80)
@@ -43,13 +42,11 @@ def main():
 
     # Step 2: Detect silences in audio (optional but recommended)
     print("\nStep 2: Detecting silences in audio...")
-    waveform, sample_rate = librosa.load(audio_path, sr=16000)
 
     silences_ms = detect_silences(
-        waveform=waveform,
-        sample_rate=sample_rate,
-        threshold_db=-30,
-        min_silence_duration_ms=300
+        audio_path=audio_path,
+        min_silence_len=300,
+        silence_thresh=-30
     )
 
     print(f"  Found {len(silences_ms)} silence periods")
@@ -66,11 +63,11 @@ def main():
     # Inspect segment types
     from munajjam.models import SegmentType
     ayah_segments = [s for s in segments if s.type == SegmentType.AYAH]
-    isti3aza_segments = [s for s in segments if s.type == SegmentType.ISTI3AZA]
+    istiadha_segments = [s for s in segments if s.type == SegmentType.ISTIADHA]
     basmala_segments = [s for s in segments if s.type == SegmentType.BASMALA]
 
     print(f"    - Ayah segments: {len(ayah_segments)}")
-    print(f"    - Isti'aza segments: {len(isti3aza_segments)}")
+    print(f"    - Istiadha segments: {len(istiadha_segments)}")
     print(f"    - Basmala segments: {len(basmala_segments)}")
 
     # Step 4: Load reference ayahs

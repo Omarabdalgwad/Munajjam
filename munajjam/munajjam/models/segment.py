@@ -12,7 +12,7 @@ class SegmentType(str, Enum):
     """Type of audio segment."""
 
     AYAH = "ayah"
-    ISTI3AZA = "isti3aza"  # أعوذ بالله من الشيطان الرجيم
+    ISTIADHA = "istiadha"  # أعوذ بالله من الشيطان الرجيم
     BASMALA = "basmala"  # بسم الله الرحمن الرحيم
 
 
@@ -21,7 +21,7 @@ class Segment(BaseModel):
     Represents a transcribed audio segment.
 
     A segment is a contiguous portion of audio that has been transcribed
-    to text. Segments can be ayahs, isti'aza (seeking refuge), or basmala.
+    to text. Segments can be ayahs, istiadha (seeking refuge), or basmala.
 
     Attributes:
         id: Segment identifier (0 for special segments, positive for ayahs)
@@ -29,7 +29,7 @@ class Segment(BaseModel):
         start: Start time in seconds
         end: End time in seconds
         text: Transcribed Arabic text
-        type: Type of segment (ayah, isti3aza, basmala)
+        type: Type of segment (ayah, istiadha, basmala)
         confidence: Optional confidence score from transcription (0.0-1.0)
     """
 
@@ -83,8 +83,8 @@ class Segment(BaseModel):
 
     @property
     def is_special(self) -> bool:
-        """Whether this is a special segment (isti'aza or basmala)."""
-        return self.type in (SegmentType.ISTI3AZA, SegmentType.BASMALA)
+        """Whether this is a special segment (istiadha or basmala)."""
+        return self.type in (SegmentType.ISTIADHA, SegmentType.BASMALA)
 
     model_config = {
         "json_schema_extra": {

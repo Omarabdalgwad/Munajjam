@@ -57,13 +57,13 @@ def process_surah(transcriber, aligner, audio_path, surah_number):
 
 def main():
     # Configuration
-    audio_directory = Path("path/to/audio/files")
-    output_directory = Path("output")
+    audio_directory = Path("Quran/badr_alturki_audio")
+    output_directory = Path("output_examples")
     output_directory.mkdir(exist_ok=True)
 
     # Define which surahs to process
     # Option 1: Process specific surahs
-    surahs_to_process = [1, 2, 3, 4, 5]  # Al-Fatiha through Al-Ma'idah
+    surahs_to_process = [114]  # Just test with Surah An-Nas (shortest)
 
     # Option 2: Process all surahs
     # surahs_to_process = range(1, 115)
@@ -97,7 +97,7 @@ def main():
         print(f"\n[{i}/{len(surahs_to_process)}]", end=" ")
 
         # Find audio file (adjust pattern as needed)
-        audio_file = audio_directory / f"surah_{surah_number:03d}.wav"
+        audio_file = audio_directory / f"{surah_number:03d}.wav"
 
         if not audio_file.exists():
             print(f"Surah {surah_number}: ⚠ Audio file not found: {audio_file}")

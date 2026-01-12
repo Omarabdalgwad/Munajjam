@@ -53,8 +53,8 @@ def align_with_strategy(segments, ayahs, strategy_name):
 
 def main():
     # Configuration
-    audio_path = "path/to/surah_001.wav"
-    surah_number = 1
+    audio_path = "Quran/badr_alturki_audio/114.wav"
+    surah_number = 114
 
     print("Munajjam Alignment Strategy Comparison")
     print("=" * 80)

@@ -170,7 +170,7 @@ class Segment:
     start: float             # Start time (seconds)
     end: float               # End time (seconds)
     text: str                # Transcribed Arabic text
-    type: SegmentType        # AYAH, ISTI3AZA, or BASMALA
+    type: SegmentType        # AYAH, ISTIADHA, or BASMALA
     confidence: float        # 0.0-1.0
 ```
 

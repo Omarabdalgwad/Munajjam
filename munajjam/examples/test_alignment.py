@@ -20,7 +20,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from munajjam.transcription import WhisperTranscriber
 from munajjam.transcription.silence import detect_silences
-from munajjam.core import align_segments, normalize_arabic, similarity
+from munajjam.core import Aligner, normalize_arabic, similarity
 from munajjam.data import load_surah_ayahs, get_ayah_count
 from munajjam.models import Segment, SegmentType
 
@@ -74,7 +74,8 @@ def test_with_transcription(audio_path: str, surah_id: int):
     print(f"   Loaded {len(ayahs)} reference ayahs")
     
     start = time.time()
-    results = align_segments(segments, ayahs, silences_ms=silences)
+    aligner = Aligner(strategy="hybrid")
+    results = aligner.align(segments, ayahs, silences_ms=silences)
     align_time = time.time() - start
     print(f"   Aligned {len(results)}/{len(ayahs)} ayahs in {align_time:.2f}s")
     
@@ -132,9 +133,9 @@ def test_with_existing_segments(surah_id: int):
     print(f"🧪 TESTING ALIGNMENT ONLY - SURAH {surah_id}")
     print("=" * 60)
     
-    # Load existing segments
-    segments_file = Path(f"../../data/segments/{surah_id:03d}_segments.json")
-    silences_file = Path(f"../../data/silences/{surah_id:03d}_silences.json")
+    # Load existing segments from cache directory
+    segments_file = Path(f"../../cache/surah_{surah_id:03d}_segments.json")
+    silences_file = Path(f"../../cache/surah_{surah_id:03d}_silences.json")
     
     if not segments_file.exists():
         print(f"❌ Segments file not found: {segments_file}")
@@ -150,11 +151,11 @@ def test_with_existing_segments(surah_id: int):
     segments = []
     for seg in raw_segments:
         seg_type = SegmentType.AYAH
-        if seg.get("type") == "isti3aza":
-            seg_type = SegmentType.ISTI3AZA
+        if seg.get("type") == "istiadha":
+            seg_type = SegmentType.ISTIADHA
         elif seg.get("type") == "basmala":
             seg_type = SegmentType.BASMALA
-        
+
         segments.append(Segment(
             id=seg["id"],
             surah_id=seg["sura_id"],
@@ -190,7 +191,8 @@ def test_with_existing_segments(surah_id: int):
     # Align
     print("\n🔗 Aligning...")
     start = time.time()
-    results = align_segments(segments, ayahs, silences_ms=silences)
+    aligner = Aligner(strategy="hybrid")
+    results = aligner.align(segments, ayahs, silences_ms=silences)
     align_time = time.time() - start
     print(f"   Aligned {len(results)}/{len(ayahs)} ayahs in {align_time:.2f}s")
     

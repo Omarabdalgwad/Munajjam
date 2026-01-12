@@ -12,8 +12,8 @@ from munajjam.models.segment import Segment, SegmentType
 
 
 # Regex patterns for special segments
-# Isti'aza pattern: handles أعوذ with various alef forms and optional waw prefix
-ISTI3AZA_PATTERN = re.compile(r"[اأإآٱو]?عوذ\s*بالله\s*من\s*الشيطان\s*الرجيم")
+# Istiadha pattern: handles أعوذ with various alef forms and optional waw prefix
+ISTIADHA_PATTERN = re.compile(r"[اأإآٱو]?عوذ\s*بالله\s*من\s*الشيطان\s*الرجيم")
 
 # Basmala pattern: بسم الله الرحمن الرحيم with variations
 BASMALA_PATTERN = re.compile(r"(?:ب\s*س?م?\s*)?الله\s*الرحمن\s*الرحيم")
@@ -82,9 +82,9 @@ def remove_diacritics(text: str) -> str:
 
 def detect_special_type(
     segment: Segment | dict,
-) -> Literal["isti3aza", "basmala"] | None:
+) -> Literal["istiadha", "basmala"] | None:
     """
-    Detect if a segment is a special type (isti'aza or basmala).
+    Detect if a segment is a special type (istiadha or basmala).
 
     This function checks both the segment's explicit type field and
     performs text-based detection for cases where the type is missing.
@@ -93,11 +93,11 @@ def detect_special_type(
         segment: A Segment model or dict with 'type' and 'text' fields
 
     Returns:
-        'isti3aza', 'basmala', or None if not a special type
+        'istiadha', 'basmala', or None if not a special type
 
     Examples:
         >>> detect_special_type({"text": "أعوذ بالله من الشيطان الرجيم", "type": "ayah"})
-        'isti3aza'
+        'istiadha'
     """
     # Handle both Segment model and dict
     if isinstance(segment, Segment):
@@ -108,7 +108,7 @@ def detect_special_type(
         text = segment.get("text", "")
 
     # Check explicit type first
-    special_types = {"isti3aza", "basmala", "basmalah"}
+    special_types = {"istiadha", "basmala", "basmalah"}
     if seg_type in special_types:
         # Normalize spelling
         return "basmala" if seg_type == "basmalah" else seg_type  # type: ignore
@@ -119,21 +119,21 @@ def detect_special_type(
     if BASMALA_PATTERN.search(normalized):
         return "basmala"
 
-    if ISTI3AZA_PATTERN.search(normalized):
-        return "isti3aza"
+    if ISTIADHA_PATTERN.search(normalized):
+        return "istiadha"
 
     return None
 
 
 def is_special_segment(segment: Segment | dict) -> bool:
     """
-    Check if a segment is a special type (isti'aza or basmala).
+    Check if a segment is a special type (istiadha or basmala).
 
     Args:
         segment: A Segment model or dict
 
     Returns:
-        True if the segment is isti'aza or basmala
+        True if segment is istiadha or basmala
     """
     return detect_special_type(segment) is not None
 
@@ -158,8 +158,8 @@ def detect_segment_type(text: str) -> tuple[SegmentType, int]:
     """
     Detect segment type from transcribed text.
 
-    Used by transcribers to classify segments as ayah, isti'aza, or basmala.
-    This is the canonical implementation - do not duplicate in other modules.
+    Used by transcribers to classify segments as ayah, istiadha, or basmala.
+    This is canonical implementation - do not duplicate in other modules.
 
     Args:
         text: Transcribed Arabic text
@@ -170,7 +170,7 @@ def detect_segment_type(text: str) -> tuple[SegmentType, int]:
 
     Examples:
         >>> detect_segment_type("أعوذ بالله من الشيطان الرجيم")
-        (SegmentType.ISTI3AZA, 0)
+        (SegmentType.ISTIADHA, 0)
         >>> detect_segment_type("بسم الله الرحمن الرحيم")
         (SegmentType.BASMALA, 0)
         >>> detect_segment_type("الحمد لله رب العالمين")
@@ -178,8 +178,8 @@ def detect_segment_type(text: str) -> tuple[SegmentType, int]:
     """
     normalized = normalize_arabic(text)
 
-    if ISTI3AZA_PATTERN.search(normalized):
-        return SegmentType.ISTI3AZA, 0
+    if ISTIADHA_PATTERN.search(normalized):
+        return SegmentType.ISTIADHA, 0
 
     if BASMALA_PATTERN.search(normalized):
         return SegmentType.BASMALA, 0
