@@ -123,3 +123,4 @@ cache/
 *.html
 *.csv
 batch_process.py
+*.mp3

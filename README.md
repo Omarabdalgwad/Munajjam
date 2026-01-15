@@ -33,22 +33,47 @@ pip install -e ".[dev]"
 
 ## Quick Start
 
+### 1. Download a sample recitation
+
+Download a sample audio file (Surah Al-Fatiha):
+
+```bash
+curl -L -o 001.mp3 "https://pub-9ee413c8af4041c6bd5223d08f5d0f0f.r2.dev/media/uploads/assets/11/recitations/001.mp3"
+```
+
+> **Note:** Audio files should be named by surah number (e.g., `001.mp3`, `002.mp3`).
+> Browse more recitations at [cms.itqan.dev](https://cms.itqan.dev)
+
+### 2. Run the alignment
+
 ```python
 from munajjam.transcription import WhisperTranscriber
 from munajjam.core import align
 from munajjam.data import load_surah_ayahs
 
-# 1. Transcribe audio
+# Transcribe audio
 with WhisperTranscriber() as transcriber:
-    segments = transcriber.transcribe("surah_001.wav")
+    segments = transcriber.transcribe("001.mp3")
 
-# 2. Align to ayahs
+# Align to ayahs
 ayahs = load_surah_ayahs(1)
 results = align(segments, ayahs)
 
-# 3. Get timestamps
+# Get timestamps
 for result in results:
     print(f"Ayah {result.ayah.ayah_number}: {result.start_time:.2f}s - {result.end_time:.2f}s")
+```
+
+### 3. Output
+
+```
+Ayah 1: 5.62s - 9.57s
+Ayah 2: 10.51s - 14.72s
+Ayah 3: 15.45s - 18.53s
+Ayah 4: 19.21s - 22.54s
+Ayah 5: 23.27s - 28.19s
+Ayah 6: 29.00s - 33.07s
+Ayah 7: 33.98s - 46.44s
 ```
 
 ## Features
