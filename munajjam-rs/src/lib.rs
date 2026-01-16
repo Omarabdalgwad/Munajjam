@@ -7,7 +7,6 @@
 
 use pyo3::prelude::*;
 use rayon::prelude::*;
-use std::collections::HashMap;
 
 mod arabic;
 mod similarity;
@@ -38,7 +37,7 @@ fn py_normalize_arabic(text: &str) -> String {
 
 /// Compute similarity ratio between two strings (Python binding)
 #[pyfunction]
-#[pyo3(name = "similarity")]
+#[pyo3(name = "similarity", signature = (text1, text2, normalize=None))]
 fn py_similarity(text1: &str, text2: &str, normalize: Option<bool>) -> f64 {
     let normalize = normalize.unwrap_or(true);
     similarity(text1, text2, normalize)
@@ -53,7 +52,7 @@ fn py_compute_coverage_ratio(transcribed_text: &str, ayah_text: &str) -> f64 {
 
 /// Compute alignment cost (Python binding)
 #[pyfunction]
-#[pyo3(name = "compute_alignment_cost")]
+#[pyo3(name = "compute_alignment_cost", signature = (merged_text, ayah_text, critical_threshold=None, critical_penalty=None))]
 fn py_compute_alignment_cost(
     merged_text: &str,
     ayah_text: &str,
@@ -67,7 +66,7 @@ fn py_compute_alignment_cost(
 
 /// Batch similarity computation for parallel processing (Python binding)
 #[pyfunction]
-#[pyo3(name = "batch_similarity")]
+#[pyo3(name = "batch_similarity", signature = (pairs, normalize=None))]
 fn py_batch_similarity(pairs: Vec<(String, String)>, normalize: Option<bool>) -> Vec<f64> {
     let normalize = normalize.unwrap_or(true);
     pairs
@@ -110,7 +109,7 @@ pub struct AlignmentResult {
 
 /// Full DP alignment (Python binding)
 #[pyfunction]
-#[pyo3(name = "align_segments_dp")]
+#[pyo3(name = "align_segments_dp", signature = (segments, ayahs, max_segments_per_ayah=None))]
 fn py_align_segments_dp(
     segments: Vec<(i32, i32, f64, f64, String, String)>,  // (id, surah_id, start, end, text, type)
     ayahs: Vec<(i32, i32, i32, String)>,  // (id, surah_id, ayah_number, text)

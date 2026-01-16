@@ -68,13 +68,8 @@ pub fn normalize_arabic(text: &str) -> String {
 
         // Normalize alef variants
         if ALEF_VARIANTS.contains(&c) {
-            if !last_was_space || !result.is_empty() {
-                result.push('\u{0627}'); // Plain alef
-                last_was_space = false;
-            } else {
-                result.push('\u{0627}');
-                last_was_space = false;
-            }
+            result.push('\u{0627}'); // Plain alef
+            last_was_space = false;
             continue;
         }
 
@@ -128,15 +123,6 @@ fn is_arabic_letter(c: char) -> bool {
         || (0x08A0..=0x08FF).contains(&code)
 }
 
-/// Count words in Arabic text
-pub fn word_count(text: &str) -> usize {
-    let normalized = normalize_arabic(text);
-    if normalized.is_empty() {
-        return 0;
-    }
-    normalized.split_whitespace().count()
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -159,11 +145,5 @@ mod tests {
     #[test]
     fn test_normalize_empty() {
         assert_eq!(normalize_arabic(""), "");
-    }
-
-    #[test]
-    fn test_word_count() {
-        assert_eq!(word_count("بسم الله الرحمن الرحيم"), 4);
-        assert_eq!(word_count(""), 0);
     }
 }

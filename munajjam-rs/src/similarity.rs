@@ -64,17 +64,11 @@ fn count_matching_chars(a: &[char], b: &[char]) -> usize {
         b_positions.entry(c).or_default().push(i);
     }
 
-    // Find all matching blocks using a greedy approach
-    let mut matches = 0;
-    let mut used_b: Vec<bool> = vec![false; b.len()];
-
-    // Find matching blocks greedily
-    let blocks = find_matching_blocks(a, b, &b_positions);
-    for (_, _, size) in blocks {
-        matches += size;
-    }
-
-    matches
+    // Find matching blocks and sum their sizes
+    find_matching_blocks(a, b, &b_positions)
+        .iter()
+        .map(|(_, _, size)| size)
+        .sum()
 }
 
 /// Find matching blocks between two sequences

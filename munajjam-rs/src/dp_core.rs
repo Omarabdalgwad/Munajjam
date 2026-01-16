@@ -233,7 +233,7 @@ pub fn align_segments_dp(
 
     while let Some((i, j)) = current {
         if let Some(cell) = dp.get(&(i, j)) {
-            if let Some((prev_i, prev_j)) = cell.parent {
+            if let Some((prev_i, _)) = cell.parent {
                 path.push((prev_i, i, j, cell.merged_text.clone()));
             }
             current = cell.parent;
