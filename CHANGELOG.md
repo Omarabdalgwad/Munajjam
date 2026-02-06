@@ -28,7 +28,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - rapidfuzz is now a required dependency (no longer optional)
 
 ### Removed
-- Rust core (`munajjam-rs`) — all processing now in Python with rapidfuzz
 - Pure Python similarity fallback (rapidfuzz is always used)
 
 ## [2.0.0a1] - 2025-01-12
