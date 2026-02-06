@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Word-level DP alignment strategy (`word_dp`) for sub-segment precision
+- CTC segmentation strategy (`ctc_seg`) for acoustic-based alignment
+- CTC forced alignment refinement (`ctc_refine` parameter)
+- Phonetic similarity scoring for Arabic ASR confusion pairs
+- Energy-snap boundary adjustment (`energy_snap` parameter)
+- `auto` strategy that selects the best approach based on surah size and available resources
+- `WordTimestamp` model for per-word timing from CTC/attention decoding
+- `Segment.words` field for storing per-word timestamps
+- Multi-pass zone realignment with drift detection and anchor-based recovery
+
+### Changed
+- Default strategy changed from `hybrid` to `auto`
+- Default model changed to `OdyAsh/faster-whisper-base-ar-quran`
+- Default backend changed to `faster-whisper`
+- `audio_path` is now a required first argument for `Aligner` and `align()`
+- `ctc_refine` and `energy_snap` now default to `True` (full pipeline by default)
+- Aligner constructor accepts new params: `min_gap`, `ctc_refine`, `energy_snap`
+- rapidfuzz is now a required dependency (no longer optional)
+
+### Removed
+- Rust core (`munajjam-rs`) — all processing now in Python with rapidfuzz
+- Pure Python similarity fallback (rapidfuzz is always used)
+
 ## [2.0.0a1] - 2025-01-12
 
 ### Added

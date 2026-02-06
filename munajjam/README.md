@@ -41,8 +41,8 @@ with WhisperTranscriber() as transcriber:
 # Step 2: Load reference ayahs
 ayahs = load_surah_ayahs(1)
 
-# Step 3: Align segments to ayahs (uses hybrid strategy with drift fix)
-aligner = Aligner(strategy="hybrid")
+# Step 3: Align segments to ayahs (auto strategy with full pipeline)
+aligner = Aligner("surah_001.wav")  # or Aligner("surah_001.wav", strategy="word_dp")
 results = aligner.align(segments, ayahs)
 
 # Step 4: Output as JSON
@@ -65,7 +65,7 @@ with open("output.json", "w", encoding="utf-8") as f:
 Configure via environment variables:
 
 ```bash
-export MUNAJJAM_MODEL_ID="tarteel-ai/whisper-base-ar-quran"
+export MUNAJJAM_MODEL_ID="OdyAsh/faster-whisper-base-ar-quran"
 export MUNAJJAM_DEVICE="cuda"
 export MUNAJJAM_SIMILARITY_THRESHOLD="0.7"
 ```
@@ -76,7 +76,8 @@ Or programmatically:
 from munajjam import configure
 
 settings = configure(
-    model_id="tarteel-ai/whisper-base-ar-quran",
+    model_id="OdyAsh/faster-whisper-base-ar-quran",
+    model_type="faster-whisper",
     device="cuda",
     similarity_threshold=0.7,
 )
@@ -86,12 +87,18 @@ settings = configure(
 
 ```
 munajjam/
-├── core/           # Alignment algorithms (Aligner class)
-├── transcription/  # Audio transcription (Whisper implementations)
-├── models/         # Pydantic data models
-├── data/           # Bundled Quran reference data
-├── config.py       # Configuration management
-└── exceptions.py   # Custom exceptions
+├── core/                  # Alignment algorithms
+│   ├── aligner.py         # Aligner class (main entry point)
+│   ├── word_level_dp.py   # Word-level DP alignment
+│   ├── ctc_segmentation.py # CTC acoustic segmentation
+│   ├── forced_aligner.py  # CTC forced alignment refinement
+│   ├── phonetic.py        # Phonetic similarity scoring
+│   └── zone_realigner.py  # Multi-pass zone realignment
+├── transcription/         # Audio transcription (Whisper implementations)
+├── models/                # Pydantic data models (Segment, WordTimestamp, etc.)
+├── data/                  # Bundled Quran reference data
+├── config.py              # Configuration management
+└── exceptions.py          # Custom exceptions
 ```
 
 ## Core API
@@ -103,15 +110,22 @@ The `Aligner` class is the main entry point for alignment:
 ```python
 from munajjam.core import Aligner, AlignmentStrategy
 
-# Create an aligner with default settings (hybrid strategy)
-aligner = Aligner()
+# Create an aligner (audio_path required, defaults to auto strategy with full pipeline)
+aligner = Aligner("001.mp3")
 
-# Or with custom configuration
+# Override the strategy if needed
+aligner = Aligner("001.mp3", strategy="word_dp")
+
+# Or with full custom configuration
 aligner = Aligner(
-    strategy="hybrid",      # "greedy", "dp", or "hybrid" (recommended)
+    "001.mp3",              # Audio file path (required)
+    strategy="auto",        # "greedy", "dp", "hybrid", "word_dp", "ctc_seg", or "auto" (default)
     quality_threshold=0.85, # Similarity threshold for high-quality alignment
     fix_drift=True,         # Run zone realignment for long surahs
     fix_overlaps=True,      # Fix overlapping ayah timings
+    min_gap=0.3,            # Minimum gap between consecutive ayahs (seconds)
+    ctc_refine=True,        # CTC forced alignment refinement (default True)
+    energy_snap=True,       # Snap boundaries to energy minima (default True)
 )
 
 # Run alignment
@@ -135,16 +149,19 @@ For simple usage with default settings:
 ```python
 from munajjam.core import align
 
-results = align(segments, ayahs)
+results = align("001.mp3", segments, ayahs)
 ```
 
 ### Alignment Strategies
 
 | Strategy | Description | Use Case |
 |----------|-------------|----------|
+| `auto` | Automatically picks best strategy | **Recommended** - adapts to input |
+| `word_dp` | Word-level DP with per-word timestamps | Sub-segment precision |
+| `ctc_seg` | CTC acoustic segmentation | Frame-accurate boundaries |
 | `greedy` | Fast, simple matching | Quick prototyping |
 | `dp` | Dynamic programming for optimal alignment | High accuracy needed |
-| `hybrid` | DP with fallback to greedy | **Recommended** - best balance |
+| `hybrid` | DP with fallback to greedy | Legacy recommended |
 
 ## Models
 
@@ -163,6 +180,7 @@ ayah = Ayah(
 ### Segment
 ```python
 from munajjam import Segment, SegmentType
+from munajjam.models import WordTimestamp
 
 segment = Segment(
     id=1,
@@ -171,6 +189,12 @@ segment = Segment(
     end=5.32,
     text="بسم الله الرحمن الرحيم",
     type=SegmentType.AYAH,
+    words=[
+        WordTimestamp(word="بسم", start=0.0, end=1.2, probability=0.95),
+        WordTimestamp(word="الله", start=1.3, end=2.5, probability=0.98),
+        WordTimestamp(word="الرحمن", start=2.6, end=3.8, probability=0.92),
+        WordTimestamp(word="الرحيم", start=3.9, end=5.3, probability=0.90),
+    ],
 )
 ```
 
@@ -204,6 +228,46 @@ from munajjam.core import similarity
 
 score = similarity("بسم الله", "بسم الله الرحمن")
 # Returns: 0.75
+```
+
+## Advanced Features
+
+### CTC Segmentation
+
+Use CTC acoustic models for frame-accurate ayah boundaries:
+
+```python
+aligner = Aligner("001.mp3", strategy="ctc_seg")
+results = aligner.align(segments, ayahs)
+```
+
+### CTC Refinement
+
+CTC forced alignment runs by default as a post-processing step. To disable it:
+
+```python
+aligner = Aligner("001.mp3", ctc_refine=False)
+results = aligner.align(segments, ayahs)
+```
+
+### Phonetic Similarity
+
+Arabic ASR confusion-aware similarity scoring (used internally by word-level DP):
+
+```python
+from munajjam.core.phonetic import phonetic_similarity
+
+score = phonetic_similarity("بسم الله", "بسم الله")
+# Returns: 1.0 — phonetic similarity accounts for ت/ط, د/ض confusion pairs
+```
+
+### Energy Snap
+
+Energy snap runs by default. To disable it:
+
+```python
+aligner = Aligner("001.mp3", energy_snap=False)
+results = aligner.align(segments, ayahs)
 ```
 
 ## Development

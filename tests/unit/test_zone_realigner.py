@@ -50,6 +50,44 @@ def test_find_problem_runs_detects_low_similarity_sequence():
     assert runs == [(1, 3)]
 
 
+def test_find_problem_runs_no_problems():
+    """All high similarity scores should yield no problem runs."""
+    results = [
+        _make_result(1, 0.0, 3.0, 0.95),
+        _make_result(2, 3.2, 6.0, 0.92),
+        _make_result(3, 6.2, 9.0, 0.88),
+        _make_result(4, 9.2, 12.0, 0.91),
+    ]
+
+    runs = _find_problem_runs(
+        results=results,
+        similarity_threshold=0.75,
+        min_consecutive=2,
+        max_pace_ratio=2.5,
+    )
+
+    assert runs == []
+
+
+def test_find_problem_runs_single_low():
+    """A single low-similarity result (below min_consecutive) should yield no runs."""
+    results = [
+        _make_result(1, 0.0, 3.0, 0.95),
+        _make_result(2, 3.2, 6.0, 0.50),  # Single low score
+        _make_result(3, 6.2, 9.0, 0.92),
+        _make_result(4, 9.2, 12.0, 0.91),
+    ]
+
+    runs = _find_problem_runs(
+        results=results,
+        similarity_threshold=0.75,
+        min_consecutive=2,
+        max_pace_ratio=2.5,
+    )
+
+    assert runs == []
+
+
 def test_refine_low_confidence_zones_with_ctc_noop_when_unavailable(monkeypatch):
     results = [
         _make_result(1, 0.0, 3.0, 0.95),

@@ -8,7 +8,7 @@ strategies and handles all post-processing (zone realignment, overlap fixing).
 Usage:
     from munajjam.core import Aligner
 
-    aligner = Aligner(strategy="hybrid")
+    aligner = Aligner(audio_path="001.mp3")
     results = aligner.align(segments, ayahs, silences_ms=silences)
 """
 
@@ -43,7 +43,7 @@ class Aligner:
         fix_overlaps: Whether to fix overlapping ayah timings
 
     Example:
-        >>> aligner = Aligner(strategy="hybrid")
+        >>> aligner = Aligner(audio_path="001.mp3")
         >>> results = aligner.align(segments, ayahs)
         >>> for r in results:
         ...     print(f"Ayah {r.ayah.ayah_number}: {r.start_time:.2f}s - {r.end_time:.2f}s")
@@ -51,27 +51,27 @@ class Aligner:
 
     def __init__(
         self,
+        audio_path: str,
         strategy: str | AlignmentStrategy = AlignmentStrategy.AUTO,
         quality_threshold: float = 0.85,
         fix_drift: bool = True,
         fix_overlaps: bool = True,
         min_gap: float = 0.3,
-        ctc_refine: bool = False,
-        energy_snap: bool = False,
-        audio_path: str | None = None,
+        ctc_refine: bool = True,
+        energy_snap: bool = True,
     ):
         """
         Initialize the Aligner.
 
         Args:
+            audio_path: Path to the audio file being aligned
             strategy: Alignment strategy ("greedy", "dp", "hybrid", "word_dp", "ctc_seg", or "auto")
             quality_threshold: Similarity threshold for quality checks (0.0-1.0)
             fix_drift: Run zone realignment to fix timing drift in long surahs
             fix_overlaps: Fix any overlapping ayah timings
             min_gap: Minimum gap in seconds between consecutive ayahs (default 0.3)
-            ctc_refine: Run CTC forced alignment as a refinement pass (requires torchaudio)
-            energy_snap: Snap boundaries to energy minima for precise timing (requires audio_path)
-            audio_path: Path to audio file (required if ctc_refine=True or energy_snap=True)
+            ctc_refine: Run CTC forced alignment as a refinement pass (default True)
+            energy_snap: Snap boundaries to energy minima for precise timing (default True)
         """
         if isinstance(strategy, str):
             strategy = AlignmentStrategy(strategy.lower())
@@ -413,6 +413,7 @@ class Aligner:
 
 # Convenience function for simple usage
 def align(
+    audio_path: str,
     segments: list[Segment],
     ayahs: list[Ayah],
     silences_ms: list[tuple[int, int]] | None = None,
@@ -423,9 +424,10 @@ def align(
     Convenience function for alignment with default settings.
 
     This is equivalent to:
-        Aligner(strategy=strategy).align(segments, ayahs, silences_ms)
+        Aligner(audio_path).align(segments, ayahs, silences_ms)
 
     Args:
+        audio_path: Path to the audio file being aligned
         segments: List of transcribed Segment objects
         ayahs: List of reference Ayah objects
         silences_ms: Optional silence periods in milliseconds
@@ -435,5 +437,5 @@ def align(
     Returns:
         List of AlignmentResult objects
     """
-    aligner = Aligner(strategy=strategy)
+    aligner = Aligner(audio_path=audio_path, strategy=strategy)
     return aligner.align(segments, ayahs, silences_ms, on_progress)
