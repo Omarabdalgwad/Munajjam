@@ -112,12 +112,12 @@ from munajjam.core import Aligner, AlignmentStrategy
 aligner = Aligner("001.mp3")
 
 # Override the strategy if needed
-aligner = Aligner("001.mp3", strategy="word_dp")
+aligner = Aligner("001.mp3", strategy="hybrid")
 
 # Or with full custom configuration
 aligner = Aligner(
     "001.mp3",              # Audio file path (required)
-    strategy="auto",        # "greedy", "dp", "hybrid", "word_dp", or "auto" (default)
+    strategy="auto",        # "greedy", "dp", "hybrid", or "auto" (default)
     quality_threshold=0.85, # Similarity threshold for high-quality alignment
     fix_drift=True,         # Run zone realignment for long surahs
     fix_overlaps=True,      # Fix overlapping ayah timings
@@ -155,7 +155,6 @@ results = align("001.mp3", segments, ayahs)
 |----------|-------------|----------|
 | `auto` | Always selects HYBRID | **Recommended** - best across all surah sizes |
 | `hybrid` | DP with fallback to greedy | Best accuracy, robust to drift |
-| `word_dp` | Word-level DP with per-word timestamps | Sub-segment precision (used internally) |
 | `dp` | Dynamic programming for optimal alignment | Good for medium surahs |
 | `greedy` | Fast, simple matching | Quick prototyping only |
 

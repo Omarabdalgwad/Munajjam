@@ -24,8 +24,7 @@ class AlignmentStrategy(str, Enum):
     GREEDY = "greedy"  # Fast, simple greedy matching
     DP = "dp"  # Dynamic programming for optimal alignment
     HYBRID = "hybrid"  # DP with fallback to greedy (recommended)
-    WORD_DP = "word_dp"  # Word-level DP for sub-segment precision
-    AUTO = "auto"  # Automatically pick best strategy based on surah size
+    AUTO = "auto"  # Automatically pick best strategy
 
 
 class Aligner:
@@ -63,7 +62,7 @@ class Aligner:
 
         Args:
             audio_path: Path to the audio file being aligned
-            strategy: Alignment strategy ("greedy", "dp", "hybrid", "word_dp", or "auto")
+            strategy: Alignment strategy ("greedy", "dp", "hybrid", or "auto")
             quality_threshold: Similarity threshold for quality checks (0.0-1.0)
             fix_drift: Run zone realignment to fix timing drift in long surahs
             fix_overlaps: Fix any overlapping ayah timings
@@ -135,8 +134,6 @@ class Aligner:
             results = self._align_greedy(segments, ayahs, silences_ms)
         elif strategy == AlignmentStrategy.DP:
             results = self._align_dp(segments, ayahs, silences_ms, on_progress)
-        elif strategy == AlignmentStrategy.WORD_DP:
-            results = self._align_word_dp(segments, ayahs, silences_ms, on_progress)
         else:  # HYBRID
             results = self._align_hybrid(segments, ayahs, silences_ms, on_progress)
 
@@ -183,23 +180,6 @@ class Aligner:
         from .dp_core import align_segments_dp_with_constraints
 
         return align_segments_dp_with_constraints(
-            segments=segments,
-            ayahs=ayahs,
-            silences_ms=silences_ms,
-            on_progress=on_progress,
-        )
-
-    def _align_word_dp(
-        self,
-        segments: list[Segment],
-        ayahs: list[Ayah],
-        silences_ms: list[tuple[int, int]] | None,
-        on_progress: Callable[[int, int], None] | None,
-    ) -> list[AlignmentResult]:
-        """Run word-level DP alignment."""
-        from .word_level_dp import align_segments_word_dp
-
-        return align_segments_word_dp(
             segments=segments,
             ayahs=ayahs,
             silences_ms=silences_ms,
@@ -318,7 +298,7 @@ def align(
         segments: List of transcribed Segment objects
         ayahs: List of reference Ayah objects
         silences_ms: Optional silence periods in milliseconds
-        strategy: Alignment strategy ("greedy", "dp", "hybrid", "word_dp", or "auto")
+        strategy: Alignment strategy ("greedy", "dp", "hybrid", or "auto")
         on_progress: Optional progress callback
 
     Returns:
