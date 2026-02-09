@@ -2,10 +2,7 @@
 Unit tests for zone-level realignment helpers.
 """
 
-from munajjam.core.zone_realigner import (
-    _find_problem_runs,
-    refine_low_confidence_zones_with_ctc,
-)
+from munajjam.core.zone_realigner import _find_problem_runs
 from munajjam.models import AlignmentResult, Ayah
 
 
@@ -88,27 +85,4 @@ def test_find_problem_runs_single_low():
     assert runs == []
 
 
-def test_refine_low_confidence_zones_with_ctc_noop_when_unavailable(monkeypatch):
-    results = [
-        _make_result(1, 0.0, 3.0, 0.95),
-        _make_result(2, 3.2, 6.0, 0.62),
-        _make_result(3, 6.2, 9.0, 0.58),
-    ]
-
-    # Force CTC path to skip without touching timestamps.
-    monkeypatch.setattr(
-        "munajjam.core.forced_aligner.is_available",
-        lambda: False,
-    )
-
-    updated, refined = refine_low_confidence_zones_with_ctc(
-        results=results,
-        audio_path="dummy.mp3",
-        similarity_threshold=0.75,
-        min_consecutive=2,
-    )
-
-    assert refined == 0
-    assert [r.start_time for r in updated] == [r.start_time for r in results]
-    assert [r.end_time for r in updated] == [r.end_time for r in results]
 

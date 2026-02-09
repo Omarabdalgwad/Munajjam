@@ -55,7 +55,7 @@ from munajjam.data import load_surah_ayahs
 with WhisperTranscriber() as transcriber:
     segments = transcriber.transcribe("001.mp3")
 
-# Align to ayahs (uses auto strategy by default, or pass strategy="word_dp" etc.)
+# Align to ayahs (uses auto strategy by default; override with "greedy", "dp", or "hybrid")
 ayahs = load_surah_ayahs(1)
 results = align("001.mp3", segments, ayahs)
 
@@ -79,13 +79,12 @@ Ayah 7: 33.98s - 46.44s
 ## Features
 
 - **Whisper Transcription** - Uses faster-whisper as default backend with Quran-tuned models
-- **Six Alignment Strategies** - Including Auto, Word-level DP, and CTC Segmentation
+- **Four Alignment Strategies** - Auto, Hybrid, DP, and Greedy
 - **Arabic Text Normalization** - Handles diacritics, hamzas, and character variations
 - **Automatic Drift Correction** - Multi-pass zone realignment for long recordings
 - **Quality Metrics** - Confidence scores for each aligned ayah
-- **Acoustic Alignment (CTC)** - CTC forced alignment for frame-accurate boundaries
 - **Phonetic Similarity** - Arabic ASR confusion-aware similarity scoring
-- **Word-level Precision** - Per-word timestamps and sub-segment alignment
+- **Word-level Precision** - Uses per-word timestamps (when available) to improve drift recovery
 
 ## Alignment Strategies
 
@@ -96,12 +95,6 @@ from munajjam.core import Aligner
 
 # Auto (recommended) - picks the best strategy, full pipeline by default
 aligner = Aligner("001.mp3")
-
-# Word-level DP - sub-segment precision using per-word timestamps
-aligner = Aligner("001.mp3", strategy="word_dp")
-
-# CTC Segmentation - acoustic-based alignment
-aligner = Aligner("001.mp3", strategy="ctc_seg")
 
 # Hybrid - DP with greedy fallback (legacy)
 aligner = Aligner("001.mp3", strategy="hybrid")

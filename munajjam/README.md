@@ -42,7 +42,7 @@ with WhisperTranscriber() as transcriber:
 ayahs = load_surah_ayahs(1)
 
 # Step 3: Align segments to ayahs (auto strategy with full pipeline)
-aligner = Aligner("surah_001.wav")  # or Aligner("surah_001.wav", strategy="word_dp")
+aligner = Aligner("surah_001.wav")  # or Aligner("surah_001.wav", strategy="hybrid")
 results = aligner.align(segments, ayahs)
 
 # Step 4: Output as JSON
